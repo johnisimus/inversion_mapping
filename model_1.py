@@ -11,6 +11,7 @@ from keras import Sequential
 from keras.layers.recurrent import LSTM
 from keras.layers import Dense, TimeDistributed, Bidirectional
 from keras.layers.core import Activation
+from pad import pad_3D_sequence
 
 class Model():
 
@@ -28,6 +29,10 @@ class Model():
             self.X_train.append(self.lsfs[num])
             self.Y_train.append(self.emas[num])
     
+    def pad_data(self):
+        self.X = pad_3D_sequence(self.X_train)
+        self.Y = pad_3D_sequence(self.Y_train)
+    
     def load_lsf_data(self, path):
         self.lsfs = get_all_data(path, 'lsf')
     
@@ -40,7 +45,7 @@ class Model():
         self.model.add(TimeDistributed(Dense(12)))
         self.model.add(Activation('sigmoid'))
         print('compiling')
-        self.model.compile(loss = 'mean_squared_error', optimizer = 'adam', 
+        self.model.compile(loss = 'mean_squared_error', optimizer = 'rmsprop', 
                                metrics = ['accuracy'])
     
     def data_generator(self):
@@ -49,7 +54,14 @@ class Model():
                 yield (x.reshape(1, len(x), len(x[0])), y.reshape(1, len(y),
                                  len(y[0])))
 
-    def train_model(self):
+    def train_model(self, num_epochs):
         data_gen = self.data_generator()
-        self.model.fit_generator(data_gen, steps_per_epoch=len(self.X_train), epochs=10)
+        self.model.fit_generator(data_gen, steps_per_epoch=42, epochs=num_epochs)
     
+    def train_model_no_generator(self, num_epochs):
+        self.model.fit(self.X, self.Y, epochs=10, batch_size=42)
+    
+
+
+
+#a tiny change

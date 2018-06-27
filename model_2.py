@@ -6,7 +6,7 @@ Created on Wed Jun 27 09:54:15 2018
 @author: jstockdale
 """
 
-from keras import sequential
+from keras import Sequential
 from keras.models import model_from_json
 from keras.layers.recurrent import LSTM
 from keras.layers import Dense, Bidirectional, TimeDistributed
@@ -35,7 +35,21 @@ class Model():
             j += self.timestep_size
             self.x_list.append(X[i:j])
             self.y_list.append(Y[i:j])
-        self.x_list.append(X[i:len(X)])
-        self.y_list.append(Y[i:len(Y)])
+        del X,Y
+    
+    def data_generator(self):
+        while True:
+            i = 0
+            j = self.batch_size
+            x,y = np.asarray(self.x_list[i:j]), np.asarray(self.y_list[i:j])
+            yield (x,y)
+            while j < len(self.x_list):
+                i += self.batch_size
+                j += self.batch_size
+                x,y = np.asarray(self.x_list[i:j]), np.asarray(self.y_list[i:j])
+                yield (x,y)
+                
+                
+                
 
             

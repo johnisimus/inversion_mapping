@@ -42,12 +42,35 @@ class Model():
             i = 0
             j = self.batch_size
             x,y = np.asarray(self.x_list[i:j]), np.asarray(self.y_list[i:j])
+            length = len(self.x_list)
             yield (x,y)
             while j < len(self.x_list):
                 i += self.batch_size
                 j += self.batch_size
-                x,y = np.asarray(self.x_list[i:j]), np.asarray(self.y_list[i:j])
+                if j < length:
+                    x,y = np.asarray(self.x_list[i:j]), np.asarray(self.y_list[i:j])
+                else:
+                    x,y = np.asarray(self.x_list[i:length-1]), np.asarray(self.y_list[i:length-1])
+                    yield(x,y)
+                    x,y = np.array([self.x_list[-1]]), np.array([self.y_list[-1]])
                 yield (x,y)
+    
+    def define_model(self, hidden_size):
+        input_size = self.x_list[0].shape[1]
+        self.model = Sequential()
+        self.model.add(Bidirectional(LSTM(hidden_size, return_sequences=True),input_shape=(None, input_size)))
+        self.model.add(Bidirectional(LSTM(hidden_size, return_sequences=True)))
+        self.model.add(TimeDistributed(Dense(12)))
+        self.model.add(Activation('sigmoid'))
+        print('compiling')
+        self.model.compile(loss = 'mean_squared_error', optimizer = 'rmsprop', 
+                               metrics = ['accuracy'])
+    
+    def train(self, num_epochs):
+        gen = self.data_generator()
+        steps = int(len(self.x_list) / self.batch_size)
+        self.model.fit_generator(gen, steps_per_epoch=steps, epochs=num_epochs)
+        
                 
                 
                 

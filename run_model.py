@@ -16,8 +16,8 @@ model = Model()
 model.load_ema_data(ema_path)
 model.load_lsf_data(lsf_path)
 model.add_training_files(training_path)
-model.define_model(128, 41)
-model.train_model(num_epochs=100)
+model.define_model(200, 41)
+model.train_model(num_epochs=50)
 
 model_json = model.model.to_json()
 with open('model.json', 'w') as json_file:

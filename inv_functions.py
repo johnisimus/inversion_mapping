@@ -62,5 +62,13 @@ def pad_3D_sequence(seq):
         newarray = np.concatenate((newarray,t.reshape(1,len(t),len(t[0]))))
         print('done with part ',n,' ',i)
     return newarray
+
+def prepare_and_save(data):
+    master_array = np.array([[]], dtype='float32').reshape(0, len(data[0][0]))
+    for a in data:
+        zeroed = np.concatenate((a, np.zeros((1, a.shape[1]), dtype='float32')))
+        master_array = np.concatenate((master_array,zeroed))
+    np.save('x_train.npy', master_array)
+        
  
 
